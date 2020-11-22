@@ -1,0 +1,215 @@
+main {
+    width: 600px;
+    margin-left: auto;margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    align-content: flex-start;
+}
+
+#menu {
+    list-style: none;
+    font-size: 15px;
+    text-align: left;
+}
+
+#menu li {
+    display: inline;
+    padding: 5px;
+}
+
+#function-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    grid-column-start: 1; grid-column-end: var(--functionColumnEnd); 
+    grid-row-start: 1; grid-row-end: 4; 
+    background-color: lightslategray;
+}
+
+#restMineNumber {
+    font-size: 0px;
+    width: 51px;
+    height: 32px;
+    padding-left: 10px;
+}
+
+#timer {
+    font-size: 0px;
+    width: 51px;
+    height: 32px;
+    padding-right: 10px;
+}
+
+#grid {
+    display: grid;
+    justify-content: center;
+    gap: 0;
+    grid-template-rows: repeat(var(--gridTemplateRows), 20px);
+    grid-template-columns: repeat(var(--gridTemplateColumns), 20px);
+}
+
+.btn0 {
+    background: url("./img/number0.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn1 {
+    background: url("./img/number1.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn2 {
+    background: url("./img/number2.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn3 {
+    background: url("./img/number3.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn4 {
+    background: url("./img/number4.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn5 {
+    background: url("./img/number5.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn6 {
+    background: url("./img/number6.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn7 {
+    background: url("./img/number7.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.btn8 {
+    background: url("./img/number8.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.square {
+    background: url("./img/square.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.mine {
+    background: url("./img/mine.png") no-repeat;
+    background-size: 20px;
+    background-color: lightgray;
+    width: 20px;
+    height: 20px;
+}
+
+.flag {
+    background: url("./img/flag.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.facePlain {
+    background: url("./img/plain.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.faceWin {
+    background: url("./img/win.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.faceLose {
+    background: url("./img/lose.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.digit0 {
+    background: url("./img/digits.png") 0 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit1 {
+    background: url("./img/digits.png") -18px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit2 {
+    background: url("./img/digits.png") -36px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit3 {
+    background: url("./img/digits.png") -54px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit4 {
+    background: url("./img/digits.png") -72px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit5 {
+    background: url("./img/digits.png") -90px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit6 {
+    background: url("./img/digits.png") -108px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit7 {
+    background: url("./img/digits.png") -126px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit8 {
+    background: url("./img/digits.png") -144px 0;
+    width: 17px;
+    height: 32px;
+}
+
+.digit9 {
+    background: url("./img/digits.png") -162px 0;
+    width: 17px;
+    height: 32px;
+}
