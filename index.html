@@ -11,14 +11,14 @@
 </head>
 
 <body>
-    <main class="game-container">
-        <div id="menu">
-            <ul id="Difficulty">
-                <li id="beginner">Beginner</li>
-                <li id="intermediate">Intermediate</li>
-                <li id="expert">Expert</li>
-            </ul>
-        </div>
+    <main>
+        <table id="menu">
+            <tr>
+                <td id="beginner">Beginner</td>
+                <td id="intermediate">Intermediate</td>
+                <td id="expert">Expert</td>
+            </tr>
+        </table>
         <div id="grid">
             <div id="function-box">
                 <span id="restMineNumber">
@@ -33,6 +33,23 @@
                     <img class="digit0"/>
                 </span>
             </div>
+        </div>
+        <div id="score">
+            Best 10 scores
+            <ul>
+                <li>
+                    <p id="scoreHead">Beginner</p>
+                    <ul id="beginnerScore"></ul>
+                </li>
+                <li>
+                    <p id="scoreHead">Intermediate</p>
+                    <ul id="intermediateScore"></ul>
+                </li>
+                <li>
+                    <p id="scoreHead">Expert</p>
+                    <ul id="expertScore"></ul>
+                </li>
+            </ul>
         </div>
     </main>
 </body>

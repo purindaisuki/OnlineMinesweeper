@@ -38,6 +38,7 @@ export default class MineBoard {
         this.boardExplode = false;
         this.boardClear = false;
         this.probedSquareNumber = 0;
+        
         for (let row = 0; row < this.gridRow; row++) {
             for (let col = 0; col < this.gridColumn; col++) {
                 this.squares[row][col].setMine = false;
@@ -45,18 +46,6 @@ export default class MineBoard {
                 this.squares[row][col].setFlagged = false;
             }
         }
-    }
-
-    get getRow() {
-        return this.gridRow;
-    }
-
-    get getColumn() {
-        return this.gridColumn;
-    }
-
-    get getMineNumber() {
-        return this.mineNumber;
     }
 
     get isClear() {

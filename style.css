@@ -7,14 +7,63 @@ main {
 }
 
 #menu {
-    list-style: none;
-    font-size: 15px;
+    margin-bottom: 15px;
+    margin-right: auto;
+    text-align: center;
+    border-collapse: collapse;
+    border-style: hidden;
+}
+
+#menu td {
+    cursor: pointer;
+    font-size: 16px;
+    color: blue;
+    text-decoration: underline;
+    border: 1px solid black;
+    padding: 5px;
+}
+
+#score {
+    margin-top: 15px;
+    font-size: 18px; font-weight: bold;
     text-align: left;
 }
 
-#menu li {
-    display: inline;
-    padding: 5px;
+#score > ul {
+    list-style-type: none;
+    overflow: hidden;
+    font-size: 16px; font-weight: normal;
+    padding-left: 0;
+    margin: 0;
+}
+
+#score > ul > li {
+    display:inline-block;
+    vertical-align: top;
+    text-align: right;
+}
+
+#scoreHead {
+    margin-right: 40px;
+}
+
+#score > ul > li > ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-right: 40px;
+    counter-reset: scoreCounter;
+}
+
+#score > ul > li > ul > li::before {
+    counter-increment: scoreCounter;
+    content: counter(scoreCounter) ".";
+    position: absolute;
+    right: 36px;
+    width: 20px;
+}
+
+#score > ul > li > ul > li {
+    position: relative;
 }
 
 #function-box {
@@ -42,7 +91,6 @@ main {
 
 #grid {
     display: grid;
-    justify-content: center;
     gap: 0;
     grid-template-rows: repeat(var(--gridTemplateRows), 20px);
     grid-template-columns: repeat(var(--gridTemplateColumns), 20px);
@@ -128,6 +176,13 @@ main {
 
 .flag {
     background: url("./img/flag.png") no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.wrongFlag {
+    background: url("./img/wrongFlag.png") no-repeat;
     background-size: 20px;
     width: 20px;
     height: 20px;
