@@ -6,19 +6,19 @@ export default class Square {
         this.mine = false;
         this.flag = false;
 
-        this.number0ImgDir = "../img/number0.png";
-        this.number1ImgDir = "../img/number1.png";
-        this.number2ImgDir = "../img/number2.png";
-        this.number3ImgDir = "../img/number3.png";
-        this.number4ImgDir = "../img/number4.png";
-        this.number5ImgDir = "../img/number5.png";
-        this.number6ImgDir = "../img/number6.png";
-        this.number7ImgDir = "../img/number7.png";
-        this.number8ImgDir = "../img/number8.png";
-        this.squareImgDir = "../img/square.png";
-        this.mineImgDir = "../img/mine.png";
-        this.flagImgDir = "../img/flag.png";
-        this.wrongFlagImgDir = "../img/wrongFlag.png";
+        this.number0ImgDir = "./img/number0.png";
+        this.number1ImgDir = "./img/number1.png";
+        this.number2ImgDir = "./img/number2.png";
+        this.number3ImgDir = "./img/number3.png";
+        this.number4ImgDir = "./img/number4.png";
+        this.number5ImgDir = "./img/number5.png";
+        this.number6ImgDir = "./img/number6.png";
+        this.number7ImgDir = "./img/number7.png";
+        this.number8ImgDir = "./img/number8.png";
+        this.squareImgDir = "./img/square.png";
+        this.mineImgDir = "./img/mine.png";
+        this.flagImgDir = "./img/flag.png";
+        this.wrongFlagImgDir = "./img/wrongFlag.png";
     }
 
     static get getSize() {

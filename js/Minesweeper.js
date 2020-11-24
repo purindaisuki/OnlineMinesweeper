@@ -11,11 +11,11 @@ export default class Minesweeper {
         this.leftButtonDown = false;
         this.rightButtonDown = false;
 
-        this.squareImgDir = "../img/square.png";
-        this.flagImgDir = "../img/flag.png";
-        this.facePlainImgDir = "../img/plain.png";
-        this.faceWinDir = "../img/win.png";
-        this.faceLoseDir = "../img/lose.png";
+        this.squareImgDir = "./img/square.png";
+        this.flagImgDir = "./img/flag.png";
+        this.facePlainImgDir = "./img/plain.png";
+        this.faceWinDir = "./img/win.png";
+        this.faceLoseDir = "./img/lose.png";
 
         this.scoreElement = document.querySelector("#beginnerScore")
 
