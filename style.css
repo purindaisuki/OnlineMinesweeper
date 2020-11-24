@@ -103,7 +103,7 @@ img {
     gap: 0;
     grid-template-rows: repeat(var(--gridTemplateRows), 20px);
     grid-template-columns: repeat(var(--gridTemplateColumns), 20px);
-    height: fit-content; width: fit-content;
+    height: min-content; width: min-content;
     padding: 6px;
     background-color: gray;
 }
