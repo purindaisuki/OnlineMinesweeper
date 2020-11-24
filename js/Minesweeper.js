@@ -175,6 +175,7 @@ export default class Minesweeper {
                 squareElement.addEventListener("contextmenu", (event) => {
                     //right button clicked
                     event.preventDefault();
+                    this.rightButtonDown = false;
                 });
                 this.gridElement.appendChild(squareElement);
             }
