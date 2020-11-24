@@ -12,6 +12,7 @@ img {
     -moz-user-select: none;
     -o-user-select: none;
     user-select: none;
+    -webkit-user-drag: none;
 }
 
 #menu {
@@ -102,6 +103,9 @@ img {
     gap: 0;
     grid-template-rows: repeat(var(--gridTemplateRows), 20px);
     grid-template-columns: repeat(var(--gridTemplateColumns), 20px);
+    height: fit-content; width: fit-content;
+    padding: 6px;
+    background-color: gray;
 }
 
 #grid > img, #function-box > img {
