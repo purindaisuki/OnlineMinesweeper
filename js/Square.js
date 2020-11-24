@@ -1,3 +1,7 @@
+/**
+ * A class to save the properties of squares
+ * @author purindaisuki
+ */
 export default class Square {
     constructor(x, y) {
         this.x = x;

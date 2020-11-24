@@ -62,7 +62,7 @@ img {
 #score > ul > li > ul {
     list-style-type: none;
     padding-left: 0;
-    margin-right: 50px;
+    margin-right: 40px;
     counter-reset: scoreCounter;
 }
 

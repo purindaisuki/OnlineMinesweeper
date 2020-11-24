@@ -1,5 +1,9 @@
 import MineBoard from "./MineBoard.js";
 
+/**
+ * A minesweeper game with GUI
+ * @author purindaisuki
+ */
 export default class Minesweeper {
     constructor() {
         this.gridRow = 9;
@@ -10,6 +14,7 @@ export default class Minesweeper {
         this.firstClicked = false;
         this.leftButtonDown = false;
         this.rightButtonDown = false;
+        this.bothButtonDown = false;
 
         this.squareImgDir = "img/square.png";
         this.flagImgDir = "img/flag.png";
@@ -17,7 +22,19 @@ export default class Minesweeper {
         this.faceWinDir = "img/win.png";
         this.faceLoseDir = "img/lose.png";
 
-        this.scoreElement = document.querySelector("#beginnerScore")
+        this.scoreElement = document.querySelector("#beginnerScore");
+
+        this.gridElement = document.querySelector("#grid");
+        this.gridElement.addEventListener("mousedown", (event) => {
+            if (event.button == 0) {
+                this.leftButtonDown = true;
+            }
+        });
+        this.gridElement.addEventListener("mouseup", (event) => {
+            if (event.button == 0) {
+                this.leftButtonDown = false;
+            }
+        });
 
         this.levelBeginner = document.querySelector("#beginner");
         this.levelIntermediate = document.querySelector("#intermediate");
@@ -59,50 +76,53 @@ export default class Minesweeper {
         });
 
         // set row and column of grid
-        let gridElement = document.querySelector("#grid");
         document.documentElement.style.setProperty("--gridTemplateRows", this.gridRow);
         document.documentElement.style.setProperty("--gridTemplateColumns", this.gridColumn);
         
         // set each square
         for (let row = 0; row < this.gridRow; row++) {
             for (let col = 0; col < this.gridColumn; col++) {
+                let square = this.mineBoard.getSquare(row, col);
                 let squareElement = document.createElement("img");
                 squareElement.setAttribute("id", "square" + row + '-' + col);
+                // preview pressed
+                squareElement.addEventListener("mouseover", (event) => {
+                    if (!this.leftButtonDown
+                        || this.mineBoard.isClear || this.mineBoard.isFailed) {
+                        return;
+                    }
+                    this.press(square);
+                    if (this.rightButtonDown) {
+                        this.pressNeighbor(square);
+                    }
+                });
+                // cancel pressed
+                squareElement.addEventListener("mouseout", (event) => {
+                    if (!this.leftButtonDown
+                        || this.mineBoard.isClear || this.mineBoard.isFailed) {
+                        return;
+                    }
+                    this.unpressNeighbor(square);
+                });
                 squareElement.addEventListener("mousedown", (event) => {
                     if (this.mineBoard.isClear || this.mineBoard.isFailed) {
                         return;
                     }
                     if (event.button == 0) {
                         this.leftButtonDown = true;
-                    } else if (event.button == 2) {
+                    }
+                    if (event.button == 2) {
                         this.rightButtonDown = true;
                     }
-                    let square = this.mineBoard.getSquare(row, col);
-                    // if both buttons hold at the same time
-                    if (this.leftButtonDown && this.rightButtonDown) {
-                        if (!square.isCovered) {
-                            this.mineBoard.probeNeighbors(square);
-                            if (this.mineBoard.isClear || this.mineBoard.isFailed) {
-                                this.gameOver(this.mineBoard.isClear);
-                            }
+                    if (this.leftButtonDown){
+                        this.press(square);
+                        if (this.rightButtonDown) {
+                            // both buttons pressed
+                            this.pressNeighbor(square);
                         }
                     }
-                    // Only left button pressed
-                    else if (this.leftButtonDown) {
-                        if (square.isCovered && !square.isFlagged) {
-                            this.mineBoard.probe(square);
-                            if (!this.firstClicked) {
-                                this.firstClicked = true;
-                                this.tic();
-                            } else {
-                                if (this.mineBoard.isClear || this.mineBoard.isFailed) {
-                                    this.gameOver(this.mineBoard.isClear);
-                                }
-                            }
-                        }
-                    }
-                    // Only right button pressed
-                    else if (this.rightButtonDown){
+                    if (!this.leftButtonDown && this.rightButtonDown){
+                        // only right button pressed
                         if (square.isCovered) {
                             if (square.isFlagged) {
                                 this.mineBoard.unflag(square);
@@ -117,27 +137,52 @@ export default class Minesweeper {
                     }
                 });
                 squareElement.addEventListener("mouseup", (event) => {
-                    // button released
+                    if (this.mineBoard.isClear || this.mineBoard.isFailed) {
+                        return;
+                    }
+                    // if both buttons released
+                    if (this.leftButtonDown && this.rightButtonDown) {
+                        this.unpressNeighbor(square);
+                        if(!square.isCovered) {
+                            this.mineBoard.probeNeighbors(square);
+                            if (this.mineBoard.isClear || this.mineBoard.isFailed) {
+                                this.gameOver(this.mineBoard.isClear);
+                            }
+                        }
+                    } else if (this.leftButtonDown) {
+                        // Only left button released
+                        if (square.isCovered && !square.isFlagged) {
+                            this.mineBoard.probe(square);
+                            if (!this.firstClicked) {
+                                this.firstClicked = true;
+                                this.tic();
+                            } else {
+                                if (this.mineBoard.isClear || this.mineBoard.isFailed) {
+                                    this.gameOver(this.mineBoard.isClear);
+                                }
+                            }
+                        }
+                    }
                     if (event.button == 0) {
                         this.leftButtonDown = false;
-                    } else if (event.button == 2) {
+                    } 
+                    if (event.button == 2) {
                         this.rightButtonDown = false;
                     }
                 });
                 squareElement.addEventListener("contextmenu", (event) => {
                     //right button clicked
-                    event.preventDefault()
+                    event.preventDefault();
                 });
-                gridElement.appendChild(squareElement);
+                this.gridElement.appendChild(squareElement);
             }
         }
     }
 
     resetBoard() {
-        let gridElement = document.querySelector("#grid");
-        while (gridElement.childElementCount > 1) {
+        while (this.gridElement.childElementCount > 1) {
             //remove all grid except for function box
-            gridElement.removeChild(gridElement.lastElementChild);
+            this.gridElement.removeChild(this.gridElement.lastElementChild);
         }
         this.setUpBoard();
         this.restart();
@@ -168,6 +213,31 @@ export default class Minesweeper {
         let digitElements = Array.from(element);
         digitElements.forEach((digit, index) => {
             digit.style.setProperty("--bgPosition", numbers[index]);
+        });
+    }
+
+    press(square) {
+        if (square.isCovered && !square.isFlagged) {
+            square.draw(0);
+        }
+    }
+
+    pressNeighbor(square) {
+        let neighbors = this.mineBoard.getNeighbors(square);
+        neighbors.forEach((neighbor) => {
+            if (neighbor.isCovered && !neighbor.isFlagged) {
+                neighbor.draw(0);
+            }
+        });
+    }
+
+    unpressNeighbor(square) {
+        let neighbors = this.mineBoard.getNeighbors(square);
+        neighbors.push(square);
+        neighbors.forEach((neighbor) => {
+            if (neighbor.isCovered && !neighbor.isFlagged) {
+                neighbor.draw(9);
+            }
         });
     }
 
@@ -226,14 +296,15 @@ export default class Minesweeper {
             faceElement.src = this.faceWinDir;
             this.drawRestMineNumber(0);
 
-            let squareElements = document.querySelectorAll("#grid > img");
-            let squareList = Array.from(squareElements);
-            squareList.forEach((square) => {
-                // replace covered squares with flags
-                if (square.src == this.squareImgDir){
-                    square.src = this.flagImgDir;
+            // replace covered squares with flags
+            for (let row = 0; row < this.gridRow; row++) {
+                for (let col = 0; col < this.gridColumn; col++) {
+                    let square = this.mineBoard.getSquare(row, col);
+                    if (square.isCovered && !square.isFlagged) {
+                        square.draw(11);
+                    }
                 }
-            });
+            }
 
             // append score and sort
             let scores = Array.from(this.scoreElement.childNodes);
@@ -258,10 +329,10 @@ export default class Minesweeper {
         else {
             faceElement.src = this.faceLoseDir;
 
+            //show mines and mark wrong flags
             for (let row = 0; row < this.gridRow; row++) {
                 for (let col = 0; col < this.gridColumn; col++) {
                     let square = this.mineBoard.getSquare(row, col);
-                    let squareElement = document.querySelector("#square" + row + "-" + col);
                     if (!square.isMine && square.isFlagged) {
                         square.draw(12);
                     } else if (square.isMine && square.isCovered && !square.isFlagged) {
