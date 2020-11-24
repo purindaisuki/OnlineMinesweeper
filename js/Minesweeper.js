@@ -70,6 +70,7 @@ export default class Minesweeper {
 
         this.drawRestMineNumber(this.mineNumber);
         let faceElement = document.querySelector("#face");
+        faceElement.setAttribute("draggable", false);
         faceElement.src = this.facePlainImgDir;
         faceElement.addEventListener("click", (event) => {
             this.restart();
@@ -85,6 +86,7 @@ export default class Minesweeper {
                 let square = this.mineBoard.getSquare(row, col);
                 let squareElement = document.createElement("img");
                 squareElement.setAttribute("id", "square" + row + '-' + col);
+                squareElement.setAttribute("draggable", false);
                 // preview pressed
                 squareElement.addEventListener("mouseover", (event) => {
                     if (!this.leftButtonDown
