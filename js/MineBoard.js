@@ -41,9 +41,11 @@ export default class MineBoard {
         
         for (let row = 0; row < this.gridRow; row++) {
             for (let col = 0; col < this.gridColumn; col++) {
-                this.squares[row][col].setMine = false;
-                this.squares[row][col].setCovered = true;
-                this.squares[row][col].setFlagged = false;
+                let square = this.squares[row][col];
+                square.setMine = false;
+                square.setCovered = true;
+                square.setFlagged = false;
+                square.draw(9);
             }
         }
     }
@@ -127,46 +129,16 @@ export default class MineBoard {
      */
     probe(square) {
         square.covered = false;
-        let squareElement = document.querySelector("#square" +  square.x + "-" + square.y);
-        squareElement.classList.remove("square");
         if (this.probedSquareNumber++ == 0) {
             //generate map after the first square is pressed
             this.generateSolvableMap(square);
         }
         if (square.isMine) {
             this.boardExplode = true;
-            squareElement.classList.add("mine");
+            square.draw(10);
         } else {
             let mineCount = this.countNeighor(square, this.COUNT_NEIGHBOR_MINE);
-            switch (mineCount) {
-                case(0) :
-                    squareElement.classList.add("btn0");
-                    break;
-                case(1) :
-                    squareElement.classList.add("btn1");
-                    break;
-                case(2) :
-                    squareElement.classList.add("btn2");
-                    break;
-                case(3) :
-                    squareElement.classList.add("btn3");
-                    break;
-                case(4) :
-                    squareElement.classList.add("btn4");
-                    break;
-                case(5) :
-                    squareElement.classList.add("btn5");
-                    break;
-                case(6) :
-                    squareElement.classList.add("btn6");
-                    break;
-                case(7) :
-                    squareElement.classList.add("btn7");
-                    break;
-                case(8) :
-                    squareElement.classList.add("btn8");
-                    break;
-            }
+            square.draw(mineCount);
             if (this.probedSquareNumber + this.mineNumber == this.gridRow * this.gridColumn) {
                 this.boardClear = true;
             } else if (mineCount == 0) {
@@ -182,9 +154,7 @@ export default class MineBoard {
      */
     flag(square) {
         square.setFlagged = true;
-        let squareElement = document.querySelector("#square" +  square.x + "-" + square.y);
-        squareElement.classList.remove("square");
-        squareElement.classList.add("flag");
+        square.draw(11);
     }
 
     /**
@@ -193,9 +163,7 @@ export default class MineBoard {
      */
     unflag(square) {
         square.setFlagged = false;
-        let squareElement = document.querySelector("#square" +  square.x + "-" + square.y);
-        squareElement.classList.remove("flag");
-        squareElement.classList.add("square");
+        square.draw(9);
     }
 
     /**

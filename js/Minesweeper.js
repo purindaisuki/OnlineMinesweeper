@@ -11,6 +11,12 @@ export default class Minesweeper {
         this.leftButtonDown = false;
         this.rightButtonDown = false;
 
+        this.squareImgDir = "../img/square.png";
+        this.flagImgDir = "../img/flag.png";
+        this.facePlainImgDir = "../img/plain.png";
+        this.faceWinDir = "../img/win.png";
+        this.faceLoseDir = "../img/lose.png";
+
         this.scoreElement = document.querySelector("#beginnerScore")
 
         this.levelBeginner = document.querySelector("#beginner");
@@ -47,18 +53,21 @@ export default class Minesweeper {
 
         this.drawRestMineNumber(this.mineNumber);
         let faceElement = document.querySelector("#face");
+        faceElement.src = this.facePlainImgDir;
         faceElement.addEventListener("click", (event) => {
             this.restart();
         });
 
+        // set row and column of grid
         let gridElement = document.querySelector("#grid");
         document.documentElement.style.setProperty("--gridTemplateRows", this.gridRow);
         document.documentElement.style.setProperty("--gridTemplateColumns", this.gridColumn);
+        
+        // set each square
         for (let row = 0; row < this.gridRow; row++) {
             for (let col = 0; col < this.gridColumn; col++) {
                 let squareElement = document.createElement("img");
                 squareElement.setAttribute("id", "square" + row + '-' + col);
-                squareElement.classList.add("square");
                 squareElement.addEventListener("mousedown", (event) => {
                     if (this.mineBoard.isClear || this.mineBoard.isFailed) {
                         return;
@@ -108,15 +117,16 @@ export default class Minesweeper {
                     }
                 });
                 squareElement.addEventListener("mouseup", (event) => {
-                    // left button released
+                    // button released
                     if (event.button == 0) {
                         this.leftButtonDown = false;
+                    } else if (event.button == 2) {
+                        this.rightButtonDown = false;
                     }
                 });
                 squareElement.addEventListener("contextmenu", (event) => {
                     //right button clicked
                     event.preventDefault()
-                    this.rightButtonDown = false;
                 });
                 gridElement.appendChild(squareElement);
             }
@@ -156,12 +166,8 @@ export default class Minesweeper {
 
     drawDigits(element,numbers) {
         let digitElements = Array.from(element);
-        digitElements.forEach((item, index) => {
-            let itemClass = item.classList.item(0);
-            if (itemClass != "digit" + numbers[index]) {
-                item.classList.add("digit" + numbers[index]);
-                item.classList.remove(itemClass);
-            }
+        digitElements.forEach((digit, index) => {
+            digit.style.setProperty("--bgPosition", numbers[index]);
         });
     }
 
@@ -191,25 +197,19 @@ export default class Minesweeper {
         this.restMineNumber = this.mineNumber;
         this.firstClicked = false;
 
-        //reset time
+        // reset time
         this.toc();
         this.drawTime(0);
-        //reset number of rest mine
+        // reset number of rest mine
         this.drawRestMineNumber(this.mineNumber);
-        //reset face
-        let faceClassList = document.querySelector("#face").classList;
-        if (!faceClassList.contains("facePlain")) {
-            faceClassList.remove(faceClassList.item(0));
-            faceClassList.add("facePlain");
-        }
-        //reset squares
+        // reset face
+        let faceElement = document.querySelector("#face");
+        faceElement.src = this.facePlainImgDir;
+        // reset squares
         let squareElements = document.querySelectorAll("#grid > img");
         let squareList = Array.from(squareElements);
-        squareList.forEach((item) => {
-            if (!item.classList.contains("square")){
-                item.classList.add("square");
-                item.classList.remove(item.classList.item(0));
-            }
+        squareList.forEach((square) => {
+            square.src = this.squareImgDir;
         });
         this.mineBoard.initialize();
     }
@@ -221,25 +221,23 @@ export default class Minesweeper {
     gameOver(isWin) {
         this.toc();
         
-        let faceElementClass = document.querySelector("#face").classList;
-        faceElementClass.remove(faceElementClass.item(0));
+        let faceElement = document.querySelector("#face");
         if (isWin) {
-            faceElementClass.add("faceWin");
+            faceElement.src = this.faceWinDir;
             this.drawRestMineNumber(0);
 
             let squareElements = document.querySelectorAll("#grid > img");
             let squareList = Array.from(squareElements);
-            squareList.forEach((item) => {
+            squareList.forEach((square) => {
                 // replace covered squares with flags
-                if (item.classList.contains("square")){
-                    item.classList.add("flag");
-                    item.classList.remove(item.classList.item(0));
+                if (square.src == this.squareImgDir){
+                    square.src = this.flagImgDir;
                 }
             });
 
             // append score and sort
             let scores = Array.from(this.scoreElement.childNodes);
-            let score = document.createTextNode(this.playTime / 100);
+            let score = document.createTextNode((this.playTime / 100).toFixed(2));
             let scoreNode = document.createElement("li");
             scoreNode.appendChild(score);
             scores.push(scoreNode);
@@ -258,24 +256,19 @@ export default class Minesweeper {
             });
         }
         else {
-            faceElementClass.add("faceLose");
+            faceElement.src = this.faceLoseDir;
 
             for (let row = 0; row < this.gridRow; row++) {
                 for (let col = 0; col < this.gridColumn; col++) {
                     let square = this.mineBoard.getSquare(row, col);
-                    let squareClassList = document.querySelector("#square" + row + "-" + col).classList;
-                    if (!square.isMine && squareClassList.contains("flag")) {
-                        squareClassList.add("wrongFlag");
-                        squareClassList.remove(squareClassList.item(0));
-                    } else if (square.isMine) {
-                        if (squareClassList.contains("square")) {
-                            squareClassList.add("mine");
-                            squareClassList.remove(squareClassList.item(0));
-                        }
+                    let squareElement = document.querySelector("#square" + row + "-" + col);
+                    if (!square.isMine && square.isFlagged) {
+                        square.draw(12);
+                    } else if (square.isMine && square.isCovered && !square.isFlagged) {
+                        square.draw(10);
                     }
                 }
             }
-
         }
     }
 }
