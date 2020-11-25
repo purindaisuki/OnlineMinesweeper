@@ -1,18 +1,9 @@
 main {
-    width: 600px;
+    width: max-content;
     margin-left: auto;margin-right: auto;
     display: flex;
     flex-direction: column;
     align-content: flex-start;
-}
-
-img {
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-    -webkit-user-drag: none;
 }
 
 #menu {
@@ -30,6 +21,79 @@ img {
     text-decoration: underline;
     border: 1px solid black;
     padding: 5px;
+}
+
+#outside-frame {
+    width: min-content; height: min-content;
+    padding-right: 4px; padding-bottom: 4px;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+#inner-frame {
+    width: min-content; height: min-content;
+    padding-left: 4px; padding-top: 4px;
+}
+
+.light-frame {
+    background-color: rgb(236, 236, 236);
+}
+
+.dark-frame {
+    background-color: gray;
+}
+
+#game-container {
+    width: min-content;
+    padding: 8px;
+    background-color: lightgray;
+}
+
+#function-box {
+    display: flex;
+    align-items: center; justify-content: space-around;
+    width: calc(var(--gridTemplateColumns) * 20px); height: 48px;
+    font-size: 0;
+    background-color: lightgray;
+}
+
+#restmineNumber, #timer {
+    width: 51px;
+    height: 32px;
+}
+
+.digit {
+    background-repeat: no-repeat;
+    background: url("./img/digits.png");
+    background-position: calc(var(--bgPosition) * -18px) 0;
+    width: 17px;
+    height: 32px;
+}
+
+#bar {
+    height: 8px;
+    margin: 0;
+    background-color: lightgray;
+}
+
+#grid {
+    display: grid;
+    gap: 0;
+    grid-template-rows: repeat(var(--gridTemplateRows), 20px);
+    grid-template-columns: repeat(var(--gridTemplateColumns), 20px);
+    height: min-content; width: min-content;
+    background-color: lightgray;
+}
+
+#grid > img, #function-box > img {
+    background-repeat: no-repeat;
+    background-size: 20px;
+    width: 20px;
+    height: 20px;
 }
 
 #score {
@@ -50,16 +114,17 @@ img {
     display:inline-block;
     vertical-align: top;
     text-align: right;
+    width: 120px;
 }
 
 #scoreHead {
-    margin-right: 50px;
+    text-align: center;
 }
 
 #score > ul > li > ul {
     list-style-type: none;
     padding-left: 0;
-    margin-right: 40px;
+    margin-right: 30px;
     counter-reset: scoreCounter;
 }
 
@@ -67,58 +132,10 @@ img {
     counter-increment: scoreCounter;
     content: counter(scoreCounter) ".";
     position: absolute;
-    right: 48px;
-    width: 20px;
+    right: 58px;
+    width: 32px;
 }
 
 #score > ul > li > ul > li {
     position: relative;
-}
-
-#function-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    grid-column-start: 1; grid-column-end: var(--functionColumnEnd); 
-    grid-row-start: 1; grid-row-end: 4; 
-    background-color: lightslategray;
-}
-
-#restMineNumber {
-    font-size: 0px;
-    width: 51px;
-    height: 32px;
-    padding-left: 10px;
-}
-
-#timer {
-    font-size: 0px;
-    width: 51px;
-    height: 32px;
-    padding-right: 10px;
-}
-
-#grid {
-    display: grid;
-    gap: 0;
-    grid-template-rows: repeat(var(--gridTemplateRows), 20px);
-    grid-template-columns: repeat(var(--gridTemplateColumns), 20px);
-    height: min-content; width: min-content;
-    padding: 6px;
-    background-color: gray;
-}
-
-#grid > img, #function-box > img {
-    background-repeat: no-repeat;
-    background-size: 20px;
-    width: 20px;
-    height: 20px;
-}
-
-.digit {
-    background-repeat: no-repeat;
-    background: url("./img/digits.png");
-    background-position: calc(var(--bgPosition) * -18px) 0;
-    width: 17px;
-    height: 32px;
 }

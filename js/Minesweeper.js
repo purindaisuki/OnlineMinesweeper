@@ -65,9 +65,6 @@ export default class Minesweeper {
     setUpBoard() {
         this.mineBoard = new MineBoard(this.gridRow, this.gridColumn, this.mineNumber);
 
-        // set functionBox width
-        document.documentElement.style.setProperty("--functionColumnEnd", this.gridColumn + 1);
-
         this.drawRestMineNumber(this.mineNumber);
         let faceElement = document.querySelector("#face");
         faceElement.src = this.facePlainImgDir;
@@ -183,8 +180,7 @@ export default class Minesweeper {
     }
 
     resetBoard() {
-        while (this.gridElement.childElementCount > 1) {
-            //remove all grid except for function box
+        while (this.gridElement.childElementCount > 0) {
             this.gridElement.removeChild(this.gridElement.lastElementChild);
         }
         this.setUpBoard();
