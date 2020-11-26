@@ -63,10 +63,13 @@ export default class Solver {
                                 neighbor.setCovered = false;
                                 this.frontierSquares.push(neighborIndex);
                                 this.probedSqauresCount++;
+                                let num = this.mineBoard.countNeighbor(neighbor, 0)
+                                neighbor.draw(num);
                             }
                         } else {
                             neighbor.setFlagged = true;
                             this.flagCount++;
+                            neighbor.draw(11);
                         }
                     }
                 });
@@ -150,10 +153,13 @@ export default class Solver {
                             square.setCovered = false;
                             this.frontierSquares.push(squareIndex);
                             this.probedSqauresCount++;
+                            let num = this.mineBoard.countNeighbor(square, 0)
+                            square.draw(num);
                         } else {
                             // if AMN
                             square.setFlagged = true;
                             this.flagCount++;
+                            square.draw(11);
                         }
                     }
                 });
