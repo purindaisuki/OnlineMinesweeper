@@ -1,4 +1,5 @@
 import Square from "./Square.js";
+import Solver from "./Solver.js";
 
 /**
  * A class for mineboard and operations on it
@@ -12,6 +13,7 @@ export default class MineBoard {
         
         this.boardExplode = false;
         this.boardClear = false;
+        this.guessFree = false;
 
         this.gridRow = row;
         this.gridColumn = col;
@@ -33,8 +35,10 @@ export default class MineBoard {
     /**
      * Initialize the board
      * Clear all mines, flags and selected squares
+     * @param {boolean} initImg whether to initialize the images
+     * @param {boolean} initMine whether to initialize the mines
      */
-    initialize() {
+    initialize(initImg = true, initMine = true) {
         this.boardExplode = false;
         this.boardClear = false;
         this.probedSquareNumber = 0;
@@ -42,10 +46,14 @@ export default class MineBoard {
         for (let row = 0; row < this.gridRow; row++) {
             for (let col = 0; col < this.gridColumn; col++) {
                 let square = this.squares[row][col];
-                square.setMine = false;
                 square.setCovered = true;
                 square.setFlagged = false;
-                square.draw(9);
+                if (initMine) {
+                    square.setMine = false;
+                }
+                if (initImg) {
+                    square.draw(9);
+                }
             }
         }
     }
@@ -58,43 +66,84 @@ export default class MineBoard {
         return this.boardExplode;
     }
 
+    /**
+     * @param {Square} square to be checked
+     * @returns {boolean} the square is all-free-neighbors
+     */
+    isAFN(square) {
+        let mineCount = this.countNeighbor(square, this.COUNT_NEIGHBOR_MINE);
+        let flagCount = this.countNeighbor(square, this.COUNT_NEIGHBOR_FLAG);
+        return (mineCount == flagCount);
+    }
+
+    /**
+     * @param {Square} square to be checked
+     * @returns {boolean} the square is all-mine-neighbors
+     */
+    isAMN(square) {
+        let mineCount = this.countNeighbor(square, this.COUNT_NEIGHBOR_MINE);
+        let coveredCount = this.countNeighbor(square, this.COUNT_NEIGHBOR_COVERED);
+        return (mineCount == coveredCount);
+    }
+
     getSquare(row, col) {
         return this.squares[row][col];
     }
 
     /**
      * Generate map
-     * @param clickedSquare first clicked square
+     * @param {Square} clickedSquare first clicked square
      */
-    generateSolvableMap(clickedSquare) {
-        let placedMineNum = 0;
-        this.probedSquareNumber = 1;
-        // randomly place mines
-        while (placedMineNum < this.mineNumber) {
-            let randRow = Math.floor(Math.random() * this.gridRow);
-            let randCol = Math.floor(Math.random() * this.gridColumn);
-            let randSquare = this.squares[randRow][randCol];
-            if ((randRow != clickedSquare.x || randCol != clickedSquare.y)
-                && !randSquare.isMine) {
-                    randSquare.setMine = true;
-                placedMineNum++;
+    generateMap(clickedSquare) {
+        while (true) {
+            let placedMineNum = 0;
+            this.initialize(false);
+            this.probedSquareNumber = 1;
+            clickedSquare.setCovered = false;
+            // randomly place mines
+            while (placedMineNum < this.mineNumber) {
+                let randRow = Math.floor(Math.random() * this.gridRow);
+                let randCol = Math.floor(Math.random() * this.gridColumn);
+                let randSquare = this.squares[randRow][randCol];
+                if ((randRow != clickedSquare.row || randCol != clickedSquare.col)
+                    && !randSquare.isMine) {
+                    if (!this.guessFree || ((randRow > clickedSquare.row + 1 || randRow < clickedSquare.row - 1)
+                        || (randCol > clickedSquare.col + 1 || randCol < clickedSquare.col - 1))) {
+                        // make sure not to place mines at the clicked square
+                        // or around the cilcked square in guess-free mode whihch causes guessing
+                        randSquare.setMine = true;
+                        placedMineNum++;
+                    }
+                }
+            }
+            if (!this.guessFree) {
+                // if not in guess-free mode, accept random generated map
+                return;
+            } else {
+                let solver = new Solver();
+                if (solver.solve(this, clickedSquare.row * this.gridColumn + clickedSquare.col)) {
+                    break;
+                }
             }
         }
+        //clear solver's operations
+        this.initialize(false, false);
+        clickedSquare.setCovered = false;
+        this.probedSquareNumber = 1;
     }
 
     /**
      * get squares adjacent to the square
-     * @param square The square whose neighbors are going to be return
-     * @return neighborSquares squares adjacent to the square
+     * @param {Square} square The square whose neighbors are going to be return
+     * @returns {Array} squares adjacent to the square
      */
     getNeighbors(square) {
         let neighborSquares = [];
-        let row, col;
         for (let i = -1; i < 2; i++) {
-            row = square.x + i;
+            let row = square.row + i;
             if (row >= 0 && row < this.gridRow) {
                 for (let j = -1; j < 2; j++) {
-                    col = square.y + j;
+                    let col = square.col + j;
                     if (col >= 0 && col < this.gridColumn && !(i == 0 && j == 0)) {
                         neighborSquares.push(this.squares[row][col]);
                     }
@@ -106,11 +155,11 @@ export default class MineBoard {
 
     /**
      * Count properties of neighbor squares
-     * @param square The square whose neighbors are going to be counted
-     * @param countKey Define which property to be counted
-     * @return counts of the property in neighbor squares
+     * @param {Square} square The square whose neighbors are going to be counted
+     * @param {int} countKey Define which property to be counted
+     * @returns {int} counts of the property in neighbor squares
      */
-    countNeighor(square, countKey) {
+    countNeighbor(square, countKey) {
         let count = 0;
         let neighbors = this.getNeighbors(square);
         neighbors.forEach((neighborSquare) => {
@@ -125,19 +174,21 @@ export default class MineBoard {
 
     /**
      * Probe the square
-     * @param square The square to be probed
+     * @param {Square} square The square to be probed
      */
     probe(square) {
+        if (!square.isCovered) return;
+        
         square.covered = false;
         if (this.probedSquareNumber++ == 0) {
             //generate map after the first square is pressed
-            this.generateSolvableMap(square);
+            this.generateMap(square);
         }
         if (square.isMine) {
             this.boardExplode = true;
             square.draw(10);
         } else {
-            let mineCount = this.countNeighor(square, this.COUNT_NEIGHBOR_MINE);
+            let mineCount = this.countNeighbor(square, this.COUNT_NEIGHBOR_MINE);
             square.draw(mineCount);
             if (this.probedSquareNumber + this.mineNumber == this.gridRow * this.gridColumn) {
                 this.boardClear = true;
@@ -150,7 +201,7 @@ export default class MineBoard {
 
     /**
      * Flag the square
-     * @param square The square to be flagged
+     * @param {Square} square The square to be flagged
      */
     flag(square) {
         square.setFlagged = true;
@@ -159,7 +210,7 @@ export default class MineBoard {
 
     /**
      * Unflag the square
-     * @param square The square to be unflagged
+     * @param {Square} square The square to be unflagged
      */
     unflag(square) {
         square.setFlagged = false;
@@ -167,20 +218,17 @@ export default class MineBoard {
     }
 
     /**
-     * Probe all covered neighbor squares if AFN (All-Free-Neighbor)
-     * @param square The square whose neighbors are going to be probed
+     * Probe all covered neighbor squares if AFN
+     * @param {Square} square The square whose neighbors are going to be probed
      */
     probeNeighbors(square) {
-        let mineCount = this.countNeighor(square, this.COUNT_NEIGHBOR_MINE);
-        let flagCount = this.countNeighor(square, this.COUNT_NEIGHBOR_FLAG);
-        // if AFN
-        if (mineCount == flagCount) {
-            let neighbors = this.getNeighbors(square);
-            neighbors.forEach((neighborSquare) => {
-                if (neighborSquare.isCovered && !neighborSquare.isFlagged) {
-                    this.probe(neighborSquare);
-                }
-            });
-        }
+        if (!this.isAFN(square)) return;
+
+        let neighbors = this.getNeighbors(square);
+        neighbors.forEach((neighbor) => {
+            if (neighbor.isCovered && !neighbor.isFlagged) {
+                this.probe(neighbor)
+            }
+        });
     }
 }

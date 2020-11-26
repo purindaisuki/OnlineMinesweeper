@@ -1,4 +1,5 @@
 import MineBoard from "./MineBoard.js";
+import Square from "./Square.js";
 
 /**
  * A minesweeper game with GUI
@@ -14,13 +15,15 @@ export default class Minesweeper {
         this.firstClicked = false;
         this.leftButtonDown = false;
         this.rightButtonDown = false;
-        this.bothButtonDown = false;
 
         this.squareImgDir = "img/square.png";
         this.flagImgDir = "img/flag.png";
         this.facePlainImgDir = "img/plain.png";
         this.faceWinDir = "img/win.png";
         this.faceLoseDir = "img/lose.png";
+
+        this.guessFreeBox = document.querySelector("#guess-free-mode");
+        this.guessFreeBox.addEventListener("click", (event) => this.setGuessFree());
 
         this.scoreElement = document.querySelector("#beginnerScore");
 
@@ -64,6 +67,7 @@ export default class Minesweeper {
 
     setUpBoard() {
         this.mineBoard = new MineBoard(this.gridRow, this.gridColumn, this.mineNumber);
+        this.mineBoard.guessFree = this.guessFreeBox.checked;
 
         this.drawRestMineNumber(this.mineNumber);
         let faceElement = document.querySelector("#face");
@@ -186,7 +190,11 @@ export default class Minesweeper {
         this.setUpBoard();
         this.restart();
     }
-
+    
+    /**
+     * draw elapsed time
+     * @param {int} second 
+     */
     drawTime(second) {
         if (second > 999) {
             second = 999;
@@ -196,6 +204,10 @@ export default class Minesweeper {
         this.drawDigits(timerElements, secondDigits);
     }
 
+    /**
+     * draw rest number of mines
+     * @param {int} restMineNum 
+     */
     drawRestMineNumber(restMineNum) {
         if (restMineNum < 0) {
             restMineNum = 0;
@@ -208,6 +220,11 @@ export default class Minesweeper {
         this.drawDigits(restMineElements, restMineDigits);
     }
 
+    /**
+     * draw digits
+     * @param {HTMLElement} element
+     * @param {Array} numbers
+     */
     drawDigits(element,numbers) {
         let digitElements = Array.from(element);
         digitElements.forEach((digit, index) => {
@@ -215,12 +232,20 @@ export default class Minesweeper {
         });
     }
 
+    /**
+     * show pressed icon when pressed or cursor moves over
+     * @param {Square} square the square pressed
+     */
     press(square) {
         if (square.isCovered && !square.isFlagged) {
             square.draw(0);
         }
     }
 
+    /**
+     * show pressed icon when both buttons are pressed or cursor moves over
+     * @param {Square} square the square where both buttons are pressed
+     */
     pressNeighbor(square) {
         let neighbors = this.mineBoard.getNeighbors(square);
         neighbors.forEach((neighbor) => {
@@ -230,6 +255,10 @@ export default class Minesweeper {
         });
     }
 
+    /**
+     * show normal square icon when buttons are released or cursor moves out
+     * @param {Square} square the square where both buttons are released
+     */
     unpressNeighbor(square) {
         let neighbors = this.mineBoard.getNeighbors(square);
         neighbors.push(square);
@@ -240,6 +269,9 @@ export default class Minesweeper {
         });
     }
 
+    /**
+     * start timing
+     */
     tic() {
         this.playTime = 0; // unit is 10ms
         this.timer = setInterval(() => {
@@ -247,6 +279,9 @@ export default class Minesweeper {
         }, 10);
     }
 
+    /**
+     * stop timing
+     */
     toc() {
         clearInterval(this.timer);
     }
@@ -285,7 +320,7 @@ export default class Minesweeper {
 
     /**
      * End the game
-     * @param result whether user win the game
+     * @param {boolean} isWin whether user win the game
      */
     gameOver(isWin) {
         this.toc();
@@ -340,5 +375,13 @@ export default class Minesweeper {
                 }
             }
         }
+    }
+
+    /**
+     * Enable/ disable guess-free
+     */
+    setGuessFree() {
+        this.restart();
+        this.mineBoard.guessFree = this.guessFreeBox.checked;
     }
 }

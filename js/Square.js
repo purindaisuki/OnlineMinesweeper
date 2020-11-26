@@ -3,9 +3,9 @@
  * @author purindaisuki
  */
 export default class Square {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
+    constructor(row, col) {
+        this.row = row;
+        this.col = col;
         this.covered = true;
         this.mine = false;
         this.flag = false;
@@ -27,14 +27,6 @@ export default class Square {
 
     static get getSize() {
         return 24; // 24 pixels
-    }
-
-    get getX() {
-        return this.x;
-    }
-
-	get getY() {
-        return this.y;
     }
 
 	get isCovered() {
@@ -71,7 +63,7 @@ export default class Square {
      * 12   : wrong flag
      */
     draw(num) {
-        let squareElement = document.querySelector("#square" +  this.x + "-" + this.y);
+        let squareElement = document.querySelector("#square" +  this.row + "-" + this.col);
         switch(num) {
             case(0) :
                 squareElement.src = this.number0ImgDir;
