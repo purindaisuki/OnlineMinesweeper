@@ -12,10 +12,6 @@ export default class Constraint {
         this.variables.push(variable);
     }
 
-    pop() {
-        return this.variables.pop();
-    }
-
     equals(that) {
         if (this.mineNumber != that.mineNumber
             || this.variables.length != that.variables.length) {

@@ -109,29 +109,74 @@ export default class Solver {
         while(constraintsUpdated) {
             constraintsUpdated = false;
             let constraintsCopy = Array.from(constraintsList);
-            constraintsCopy.forEach(c1 => {
-                constraintsCopy.forEach((c2, c2Index) => {
-                    if (!c1.equals(c2)) {
-                        // if constraints1 is included in constraints2
-                        if (c1.variables.every(v => c2.variables.includes(v))) {
-                            //decompose the constraint
-                            let diffMineNumber = c2.getMineNumber - c1.getMineNumber;
-                            let diffConstraint = new Constraint(diffMineNumber);
-                            c2.variables.forEach(v => {
-                                if (!c1.variables.includes(v)) {
-                                    diffConstraint.push(v);
-                                }
-                            });
-                            // no duplicate constraint in list
-                            if (!constraintsList.some(c => c.equals(diffConstraint))) {
-                                constraintsList.splice(c2Index,1);
-                                constraintsList.push(diffConstraint);
-                                constraintsUpdated = true;
+            (function () { 
+                for (let c1Index = 0; c1Index < constraintsCopy.length; c1Index++) {
+                    for (let c2Index = 0; c2Index < constraintsCopy.length; c2Index++) {
+                        // compare elements in list
+                        if (c1Index < c2Index) {
+                            let c1 = constraintsCopy[c1Index];
+                            let c2 = constraintsCopy[c2Index];
+                            //intxn refers to intersection of variables of c1 and c2
+                            let intxnVariables = c1.variables.filter(v => c2.variables.includes(v));
+                            if (intxnVariables.length == 0) {
+                                // continue to next pair if no intersection
+                                continue;
                             }
+                            //subtraction c1-c2
+                            let c12Variables = c1.variables.filter(v => !intxnVariables.includes(v));
+                            //subtraction c2-c1
+                            let c21Variables = c2.variables.filter(v => !intxnVariables.includes(v));
+
+                            //subset of variables are subject to the constraints of its parents
+                            let intxnMineMax = Math.min(
+                                intxnVariables.length,
+                                (Math.min(c1.getMineNumber, c2.getMineNumber))
+                            );
+                            let c12MineMin = c1.getMineNumber - (c1.variables.length - intxnVariables.length);
+                            let c21MineMin = c2.getMineNumber - (c2.variables.length - intxnVariables.length);
+                            let intxnMineMin = Math.max(c12MineMin, c21MineMin);
+                            let intxnMineDomain = Array.from(
+                                new Array(intxnMineMax - intxnMineMin + 1),
+                                (v, i) => i + intxnMineMin
+                            );
+                            
+                            //c1 subtracts c2
+                            let c12MineDomain = Array.from(intxnMineDomain, v => c1.getMineNumber - v);
+                            c12MineDomain = c12MineDomain.filter(m => m <= c12Variables.length);
+                            //c2 subtracts c1
+                            let c21MineDomain = Array.from(intxnMineDomain, v => c2.getMineNumber - v);
+                            c21MineDomain = c21MineDomain.filter(m => m <= c21Variables.length);
+                            
+                            let result = [];
+                            let subSets = [
+                                [intxnVariables, intxnMineDomain],
+                                [c12Variables, c12MineDomain],
+                                [c21Variables, c21MineDomain]
+                            ];
+                            subSets.forEach(s => {
+                                // only one possible solution
+                                if (s[0].length != 0 && s[1].length == 1) {
+                                    let subConstraint = new Constraint(s[1][0]);
+                                    s[0].forEach(v => subConstraint.push(v));
+                                    constraintsList.push(subConstraint);
+                                    constraintsUpdated = true;
+                                }
+                                result.push(s[1].length == 1);
+                            });
+
+                            // remove constraint if one is a proper set of another
+                            if (result[0] && result[2]) {
+                                constraintsList.splice(constraintsList.indexOf(c2),1);
+                            }
+                            if (result[0] && result[1]) {
+                                constraintsList.splice(constraintsList.indexOf(c1),1);
+                            }
+
+                            if (constraintsUpdated) return;
                         }
                     }
-                });
-            });
+                }
+            }) ();
         }
 
         // solve variables if constraint is AFN or AMN
