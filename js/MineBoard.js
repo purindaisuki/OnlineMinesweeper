@@ -95,7 +95,9 @@ export default class MineBoard {
      * @param {Square} clickedSquare first clicked square
      */
     generateMap(clickedSquare) {
+        let trys=0;
         while (true) {
+            trys++;
             let placedMineNum = 0;
             this.initialize(false);
             this.probedSquareNumber = 1;
@@ -113,6 +115,7 @@ export default class MineBoard {
                         // or around the cilcked square in guess-free mode whihch causes guessing
                         randSquare.setMine = true;
                         placedMineNum++;
+                        randSquare.draw(10);
                     }
                 }
             }
@@ -126,8 +129,9 @@ export default class MineBoard {
                 }
             }
         }
+        console.log(trys);
         //clear solver's operations
-        this.initialize(false, false);
+        this.initialize(true, false);
         clickedSquare.setCovered = false;
         this.probedSquareNumber = 1;
     }
