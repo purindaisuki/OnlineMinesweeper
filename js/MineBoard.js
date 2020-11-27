@@ -113,7 +113,6 @@ export default class MineBoard {
                         // or around the cilcked square in guess-free mode whihch causes guessing
                         randSquare.setMine = true;
                         placedMineNum++;
-                        randSquare.draw(10);
                     }
                 }
             }
@@ -128,7 +127,7 @@ export default class MineBoard {
             }
         }
         //clear solver's operations
-        this.initialize(true, false);
+        this.initialize(false, false);
         clickedSquare.setCovered = false;
         this.probedSquareNumber = 1;
     }
