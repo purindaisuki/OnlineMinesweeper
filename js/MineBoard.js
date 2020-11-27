@@ -38,7 +38,7 @@ export default class MineBoard {
      * @param {boolean} initImg whether to initialize the images
      * @param {boolean} initMine whether to initialize the mines
      */
-    initialize(initImg = true, initMine = true) {
+    initialize(initFirstClick = true, initMine = true) {
         this.boardExplode = false;
         this.boardClear = false;
         this.probedSquareNumber = 0;
@@ -48,13 +48,16 @@ export default class MineBoard {
                 let square = this.squares[row][col];
                 square.setCovered = true;
                 square.setFlagged = false;
+                square.draw(9);
                 if (initMine) {
                     square.setMine = false;
                 }
-                if (initImg) {
-                    square.draw(9);
-                }
             }
+        }
+
+        if (!initFirstClick) {
+            this.clickedSquare.setCovered = false;
+            this.probedSquareNumber = 1;
         }
     }
 
@@ -95,9 +98,10 @@ export default class MineBoard {
      * @param {Square} clickedSquare first clicked square
      */
     generateMap(clickedSquare) {
+        this.clickedSquare = clickedSquare;
         while (true) {
             let placedMineNum = 0;
-            this.initialize(false);
+            this.initialize(false, true);
             this.probedSquareNumber = 1;
             clickedSquare.setCovered = false;
             // randomly place mines
@@ -128,8 +132,6 @@ export default class MineBoard {
         }
         //clear solver's operations
         this.initialize(false, false);
-        clickedSquare.setCovered = false;
-        this.probedSquareNumber = 1;
     }
 
     /**
