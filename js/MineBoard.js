@@ -6,7 +6,7 @@ import Solver from "./Solver.js";
  * @author purindaisuki
  */
 export default class MineBoard {
-    constructor(row, col, mineNumber) {
+    constructor(row, col, mineNum) {
         this.COUNT_NEIGHBOR_MINE = 0;
         this.COUNT_NEIGHBOR_FLAG = 1;
         this.COUNT_NEIGHBOR_COVERED = 2;
@@ -17,8 +17,8 @@ export default class MineBoard {
 
         this.gridRow = row;
         this.gridColumn = col;
-        this.mineNumber = mineNumber;
-        this.probedSquareNumber = 0;
+        this.mineNum = mineNum;
+        this.probedSquareNum = 0;
 
 		this.squares = [];
 		for (let i=0; i < this.gridRow; i++) {
@@ -41,7 +41,7 @@ export default class MineBoard {
     initialize(initFirstClick = true, initMine = true) {
         this.boardExplode = false;
         this.boardClear = false;
-        this.probedSquareNumber = 0;
+        this.probedSquareNum = 0;
         
         for (let row = 0; row < this.gridRow; row++) {
             for (let col = 0; col < this.gridColumn; col++) {
@@ -57,7 +57,7 @@ export default class MineBoard {
 
         if (!initFirstClick) {
             this.clickedSquare.setCovered = false;
-            this.probedSquareNumber = 1;
+            this.probedSquareNum = 1;
         }
     }
 
@@ -102,10 +102,10 @@ export default class MineBoard {
         while (true) {
             let placedMineNum = 0;
             this.initialize(false, true);
-            this.probedSquareNumber = 1;
+            this.probedSquareNum = 1;
             clickedSquare.setCovered = false;
             // randomly place mines
-            while (placedMineNum < this.mineNumber) {
+            while (placedMineNum < this.mineNum) {
                 let randRow = Math.floor(Math.random() * this.gridRow);
                 let randCol = Math.floor(Math.random() * this.gridColumn);
                 let randSquare = this.squares[randRow][randCol];
@@ -182,7 +182,7 @@ export default class MineBoard {
         if (!square.isCovered) return;
         
         square.covered = false;
-        if (this.probedSquareNumber++ == 0) {
+        if (this.probedSquareNum++ == 0) {
             //generate map after the first square is pressed
             this.generateMap(square);
         }
@@ -192,7 +192,7 @@ export default class MineBoard {
         } else {
             let mineCount = this.countNeighbor(square, this.COUNT_NEIGHBOR_MINE);
             square.draw(mineCount);
-            if (this.probedSquareNumber + this.mineNumber == this.gridRow * this.gridColumn) {
+            if (this.probedSquareNum + this.mineNum == this.gridRow * this.gridColumn) {
                 this.boardClear = true;
             } else if (mineCount == 0) {
                 // automatically probe neighbors if there is no mine around

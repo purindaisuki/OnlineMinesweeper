@@ -9,8 +9,8 @@ export default class Minesweeper {
     constructor() {
         this.gridRow = 9;
         this.gridColumn = 9;
-        this.mineNumber = 10;
-        this.restMineNumber = this.mineNumber;
+        this.mineNum = 10;
+        this.restMineNum = this.mineNum;
     
         this.firstClicked = false;
         this.leftButtonDown = false;
@@ -45,31 +45,31 @@ export default class Minesweeper {
         this.levelBeginner.addEventListener("click", (event) => {
             this.gridRow = 9;
             this.gridColumn = 9;
-            this.mineNumber = 10;
+            this.mineNum = 10;
             this.scoreElement = document.querySelector("#beginnerScore")
             this.resetBoard();
         });
         this.levelIntermediate.addEventListener("click", (event) => {
             this.gridRow = 15;
             this.gridColumn = 13;
-            this.mineNumber = 40;
+            this.mineNum = 40;
             this.scoreElement = document.querySelector("#intermediateScore")
             this.resetBoard();
         });
         this.levelExpert.addEventListener("click", (event) => {
             this.gridRow = 16;
             this.gridColumn = 30;
-            this.mineNumber = 99;
+            this.mineNum = 99;
             this.scoreElement = document.querySelector("#expertScore")
             this.resetBoard();
         });
     }
 
     setUpBoard() {
-        this.mineBoard = new MineBoard(this.gridRow, this.gridColumn, this.mineNumber);
+        this.mineBoard = new MineBoard(this.gridRow, this.gridColumn, this.mineNum);
         this.mineBoard.guessFree = this.guessFreeBox.checked;
 
-        this.drawRestMineNumber(this.mineNumber);
+        this.drawRestMineNum(this.mineNum);
         let faceElement = document.querySelector("#face");
         faceElement.src = this.facePlainImgDir;
         faceElement.addEventListener("click", (event) => {
@@ -129,13 +129,13 @@ export default class Minesweeper {
                         if (square.isCovered) {
                             if (square.isFlagged) {
                                 this.mineBoard.unflag(square);
-                                this.restMineNumber++;
+                                this.restMineNum++;
                             }
                             else {
                                 this.mineBoard.flag(square);
-                                this.restMineNumber--;
+                                this.restMineNum--;
                             }
-                            this.drawRestMineNumber(this.restMineNumber);
+                            this.drawRestMineNum(this.restMineNum);
                         }
                     }
                 });
@@ -208,7 +208,7 @@ export default class Minesweeper {
      * draw rest number of mines
      * @param {int} restMineNum 
      */
-    drawRestMineNumber(restMineNum) {
+    drawRestMineNum(restMineNum) {
         if (restMineNum < 0) {
             restMineNum = 0;
         }
@@ -216,7 +216,7 @@ export default class Minesweeper {
             Math.floor(restMineNum/10) % 10,
             restMineNum % 10
         ];
-        let restMineElements = document.querySelectorAll("#restMineNumber img");
+        let restMineElements = document.querySelectorAll("#restMineNum img");
         this.drawDigits(restMineElements, restMineDigits);
     }
 
@@ -298,14 +298,14 @@ export default class Minesweeper {
      * Restart the game
      */
     restart() {
-        this.restMineNumber = this.mineNumber;
+        this.restMineNum = this.mineNum;
         this.firstClicked = false;
 
         // reset time
         this.toc();
         this.drawTime(0);
         // reset number of rest mine
-        this.drawRestMineNumber(this.mineNumber);
+        this.drawRestMineNum(this.mineNum);
         // reset face
         let faceElement = document.querySelector("#face");
         faceElement.src = this.facePlainImgDir;
@@ -328,7 +328,7 @@ export default class Minesweeper {
         let faceElement = document.querySelector("#face");
         if (isWin) {
             faceElement.src = this.faceWinDir;
-            this.drawRestMineNumber(0);
+            this.drawRestMineNum(0);
 
             // replace covered squares with flags
             for (let row = 0; row < this.gridRow; row++) {

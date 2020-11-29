@@ -1,10 +1,10 @@
 export default class Constraint {
-    constructor (mineNumber) {
-        this.constraint = mineNumber;
-        this.variables = new Array();
+    constructor (mineNum) {
+        this.constraint = mineNum;
+        this.variables = [];
     }
 
-    get getMineNumber() {
+    get getMineNum() {
         return this.constraint;
     }
 
@@ -13,7 +13,7 @@ export default class Constraint {
     }
 
     equals(that) {
-        if (this.mineNumber != that.mineNumber
+        if (this.mineNum != that.mineNum
             || this.variables.length != that.variables.length) {
             return false;
         }
