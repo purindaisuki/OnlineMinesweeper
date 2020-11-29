@@ -18,7 +18,7 @@ export default class Solver {
         this.mineBoard = mineBoard;
         this.gridRow = mineBoard.gridRow;
         this.gridColumn = mineBoard.gridColumn;
-        this.mineNumber = mineBoard.mineNumber;
+        this.mineNum = mineBoard.mineNum;
         
         this.flagCount = 0;
         this.probedSqauresCount = 1;
@@ -26,8 +26,8 @@ export default class Solver {
         this.frontierSquares = [clickedSquareIndex];
         // set of squares which can provide information to probe other squares
 
-        while(this.mineNumber != this.flagCount
-            && this.gridRow * this.gridColumn - this.probedSqauresCount != this.mineNumber) {
+        while(this.mineNum != this.flagCount
+            && this.gridRow * this.gridColumn - this.probedSqauresCount != this.mineNum) {
             //always try single point first since it's faster
             if (this.singlePoint()) {
                 continue;
@@ -130,10 +130,10 @@ export default class Solver {
                             //subset of variables are subject to the constraints of its parents
                             let intxnMineMax = Math.min(
                                 intxnVariables.length,
-                                (Math.min(c1.getMineNumber, c2.getMineNumber))
+                                (Math.min(c1.getMineNum, c2.getMineNum))
                             );
-                            let c12MineMin = c1.getMineNumber - (c1.variables.length - intxnVariables.length);
-                            let c21MineMin = c2.getMineNumber - (c2.variables.length - intxnVariables.length);
+                            let c12MineMin = c1.getMineNum - (c1.variables.length - intxnVariables.length);
+                            let c21MineMin = c2.getMineNum - (c2.variables.length - intxnVariables.length);
                             let intxnMineMin = Math.max(c12MineMin, c21MineMin);
                             let intxnMineDomain = Array.from(
                                 new Array(intxnMineMax - intxnMineMin + 1),
@@ -141,10 +141,10 @@ export default class Solver {
                             );
                             
                             //c1 subtracts c2
-                            let c12MineDomain = Array.from(intxnMineDomain, v => c1.getMineNumber - v);
+                            let c12MineDomain = Array.from(intxnMineDomain, v => c1.getMineNum - v);
                             c12MineDomain = c12MineDomain.filter(m => m <= c12Variables.length);
                             //c2 subtracts c1
-                            let c21MineDomain = Array.from(intxnMineDomain, v => c2.getMineNumber - v);
+                            let c21MineDomain = Array.from(intxnMineDomain, v => c2.getMineNum - v);
                             c21MineDomain = c21MineDomain.filter(m => m <= c21Variables.length);
                             
                             let result = [];
@@ -181,7 +181,7 @@ export default class Solver {
 
         // solve variables if constraint is AFN or AMN
         constraintsList.forEach(constraint => {
-            let mines = constraint.getMineNumber;
+            let mines = constraint.getMineNum;
             if (mines == 0 || mines == constraint.variables.length) {
                 boardUpdated = true;
                 constraint.variables.forEach(squareIndex => {
