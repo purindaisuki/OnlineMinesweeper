@@ -130,13 +130,17 @@ export default class MineBoard {
                 return;
             } else {
                 //test
-                let testBoard = new MineBoard(5,5,3)
+                
+                let testBoard = new MineBoard(6,6,6)
+                testBoard.squares[0][3].setMine=true;
                 testBoard.squares[1][0].setMine=true;
+                testBoard.squares[1][1].setMine=true;
+                testBoard.squares[1][3].setMine=true;
                 testBoard.squares[2][0].setMine=true;
-                testBoard.squares[2][1].setMine=true;
-                testBoard.squares[4][0].setCovered=false;
+                testBoard.squares[2][3].setMine=true;
+                testBoard.squares[0][5].setCovered=false;
                 let svr = new Solver()
-                svr.solve(testBoard,4);
+                svr.solve(testBoard,5);
                 //test
                 let solver = new Solver();
                 if (solver.solve(this, clickedSquare.row * this.gridColumn + clickedSquare.col)) {

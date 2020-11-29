@@ -1,5 +1,6 @@
 import Constraint from "./Constraint.js";
 import MineBoard from "./MineBoard.js";
+import Square from "./Square.js";
 
 /**
  * Minesweeper solver by Single Point Algorithm
@@ -10,24 +11,23 @@ export default class Solver {
 
     /**
      * Solve the board by SP and CSP
-     * @param {MineBoard} mineBoard the board to be solved
+     * @param {MineBoard} board the board to be solved
      * @param {int} clickedSquareIndex the index of first clicked square
      * @returns {boolean} whether the board is solvable
      */
-    solve(mineBoard, clickedSquareIndex) {
-        this.mineBoard = mineBoard;
-        this.gridRow = mineBoard.gridRow;
-        this.gridColumn = mineBoard.gridColumn;
-        this.mineNumber = mineBoard.mineNumber;
+    solve(board, clickedSquareIndex) {
+        this.mineBoard = board;
+        this.mineNum = board.mineNum;
+        this.clickedSquareIndex = clickedSquareIndex;
         
-        this.flagCount = 0;
-        this.probedSqauresCount = 1;
+        board.flagNum = 0;
+        board.probedSquareNum = 1;
         // include the first clicked one
         this.frontierSquares = [clickedSquareIndex];
         // set of squares which can provide information to probe other squares
 
-        while(this.mineNumber != this.flagCount
-            && this.gridRow * this.gridColumn - this.probedSqauresCount != this.mineNumber) {
+        while(this.mineNum != this.mineBoard.flagNum
+            && board.gridRow * board.gridColumn - this.mineBoard.probedSquareNum != this.mineNum) {
             //always try single point first since it's faster
             if (this.singlePoint()) {
                 continue;
@@ -43,32 +43,34 @@ export default class Solver {
 
     /**
      * Single Point Strategy
+     * @param {MineBoard} board board to be solved
+     * @param {Array} frontier frontier squares
      * @returns whether a move can be made by the strategy
      */
-    singlePoint() {
-        let frontierCopy = Array.from(this.frontierSquares);
+    singlePoint(board = this.mineBoard, frontier = this.frontierSquares) {
+        let frontierCopy = Array.from(frontier);
         for (let i = frontierCopy.length - 1; i >= 0; i--) {
             let squareIndex = frontierCopy[i];
-            let square = this.mineBoard.getSquare(
-                Math.floor(squareIndex / this.gridColumn),
-                squareIndex % this.gridColumn
+            let square = board.getSquare(
+                Math.floor(squareIndex / board.gridColumn),
+                squareIndex % board.gridColumn
             );
-            if (this.mineBoard.isAFN(square) || this.mineBoard.isAMN(square)) {
-                this.frontierSquares.splice(i, 1);
-                this.mineBoard.getNeighbors(square).forEach(neighbor => {
+            if (board.isAFN(square) || board.isAMN(square)) {
+                frontier.splice(i, 1);
+                board.getNeighbors(square).forEach(neighbor => {
                     if (neighbor.isCovered && !neighbor.isFlagged) {
-                        if (this.mineBoard.isAFN(square)) {
-                            let neighborIndex = neighbor.row * this.gridColumn + neighbor.col;
-                            if (!this.frontierSquares.includes(neighborIndex)) {
+                        if (board.isAFN(square)) {
+                            let neighborIndex = neighbor.row * board.gridColumn + neighbor.col;
+                            if (!frontier.includes(neighborIndex)) {
                                 neighbor.setCovered = false;
-                                this.frontierSquares.push(neighborIndex);
-                                this.probedSqauresCount++;
-                                let num = this.mineBoard.countNeighbor(neighbor, 0)
+                                frontier.push(neighborIndex);
+                                board.probedSquareNum++;
+                                let num = board.countNeighbor(neighbor, 0)
                                 neighbor.draw(num);
                             }
                         } else {
                             neighbor.setFlagged = true;
-                            this.flagCount++;
+                            board.flagNum++;
                             neighbor.draw(11);
                         }
                     }
@@ -81,24 +83,25 @@ export default class Solver {
 
     /**
      * Constraints satisfication problem strategy
+     * @param {MineBoard} board board to be solved
+     * @param {Array} frontier frontier squares
      * @returns whether a move can be made by the strategy
      */
-    CSP() {
-        let boardUpdated = false;
+    CSP(board = this.mineBoard, frontier = this.frontierSquares) {
         let constraintsList = [];
         // generate constraints from info provided by frontier squares
-        for (let i = this.frontierSquares.length - 1; i >= 0; i--) {
-            let squareIndex = this.frontierSquares[i];
-            let square = this.mineBoard.getSquare(
-                Math.floor(squareIndex / this.gridColumn),
-                squareIndex % this.gridColumn
+        for (let i = frontier.length - 1; i >= 0; i--) {
+            let squareIndex = frontier[i];
+            let square = board.getSquare(
+                Math.floor(squareIndex / board.gridColumn),
+                squareIndex % board.gridColumn
             );
-            let mines = this.mineBoard.countNeighbor(square, this.mineBoard.COUNT_NEIGHBOR_MINE);
-            let flags = this.mineBoard.countNeighbor(square, this.mineBoard.COUNT_NEIGHBOR_FLAG);
+            let mines = board.countNeighbor(square, board.COUNT_NEIGHBOR_MINE);
+            let flags = board.countNeighbor(square, board.COUNT_NEIGHBOR_FLAG);
             let constraint = new Constraint(mines - flags);
-            this.mineBoard.getNeighbors(square).forEach(neighbor => {
+            board.getNeighbors(square).forEach(neighbor => {
                 if (neighbor.isCovered && !neighbor.isFlagged) {
-                    constraint.push(neighbor.row * this.gridColumn + neighbor.col);
+                    constraint.push(neighbor.row * board.gridColumn + neighbor.col);
                 }
             });
             if (constraint.variables.length != 0
@@ -107,6 +110,59 @@ export default class Solver {
             }
         }
 
+        // solve variables if constraint is AFN or AMN
+        if (this.solveConstraints(constraintsList, board, frontier)){
+            return true;
+        }
+        
+        // find possible solutions meet the constraints
+        // calc all possibility is too expensive so solve constraints only once
+        let solved = [];
+        for (let i = 0; i < constraintsList[0].variables.length; i++) {
+            // assume it's a mine
+            let constraintsCopy = Array.from(constraintsList);
+            let pseudoConstraint = new Constraint(1);
+            pseudoConstraint.push(constraintsList[0].variables[i])
+            constraintsCopy.push(pseudoConstraint);
+
+            let frontierCopy = Array.from(frontier);
+
+            let boardCopy = new MineBoard(board.gridRow, board.gridColumn, this.mineNum);
+            boardCopy.flagNum = board.flagNum;
+            boardCopy.probedSquareNum = board.probedSquareNum;
+            // deep copy
+            boardCopy.squares = board.squares.map(row => {
+                return row.map(sq => Object.assign(new Square(), sq))
+            });
+
+            this.solveConstraints(constraintsCopy, boardCopy, frontierCopy);
+
+            // if all mines are marked or the rest covered square are all mines
+            if (boardCopy.flagNum == this.mineNum ||
+                this.mineNum + boardCopy.probedSquareNum
+                == board.gridRow * board.gridColumn) {
+                solved.push([boardCopy, frontierCopy]);
+            }
+
+            if (solved.length > 2) {
+                // more than one solution
+                return false;
+            }
+        }
+        if (solved.length == 1) {
+            this.mineBoard = solved[0][0];
+        }
+        return (solved.length == 1);
+    }
+
+    /**
+     * Solve the constraints
+     * @param {Array} constraintsList list of constraints
+     * @param {MineBoard} board board to be solved
+     * @param {Array} frontier frontier squares
+     * @returns {boolean} whether some of the constraints have unique solution
+     */
+    solveConstraints(constraintsList, board, frontier) {
         // decompose constraints according to their overlaps and differences
         let constraintsUpdated = true;
         while(constraintsUpdated) {
@@ -133,10 +189,10 @@ export default class Solver {
                             //subset of variables are subject to the constraints of its parents
                             let intxnMineMax = Math.min(
                                 intxnVariables.length,
-                                (Math.min(c1.getMineNumber, c2.getMineNumber))
+                                (Math.min(c1.getMineNum, c2.getMineNum))
                             );
-                            let c12MineMin = c1.getMineNumber - (c1.variables.length - intxnVariables.length);
-                            let c21MineMin = c2.getMineNumber - (c2.variables.length - intxnVariables.length);
+                            let c12MineMin = c1.getMineNum - (c1.variables.length - intxnVariables.length);
+                            let c21MineMin = c2.getMineNum - (c2.variables.length - intxnVariables.length);
                             let intxnMineMin = Math.max(c12MineMin, c21MineMin);
                             let intxnMineDomain = Array.from(
                                 new Array(intxnMineMax - intxnMineMin + 1),
@@ -144,10 +200,10 @@ export default class Solver {
                             );
                             
                             //c1 subtracts c2
-                            let c12MineDomain = Array.from(intxnMineDomain, v => c1.getMineNumber - v);
+                            let c12MineDomain = Array.from(intxnMineDomain, v => c1.getMineNum - v);
                             c12MineDomain = c12MineDomain.filter(m => m <= c12Variables.length);
                             //c2 subtracts c1
-                            let c21MineDomain = Array.from(intxnMineDomain, v => c2.getMineNumber - v);
+                            let c21MineDomain = Array.from(intxnMineDomain, v => c2.getMineNum - v);
                             c21MineDomain = c21MineDomain.filter(m => m <= c21Variables.length);
                             
                             let result = [];
@@ -182,34 +238,51 @@ export default class Solver {
             }) ();
         }
 
+        let boardUpdated = false;
         // solve variables if constraint is AFN or AMN
-        constraintsList.forEach(constraint => {
-            let mines = constraint.getMineNumber;
-            if (mines == 0 || mines == constraint.variables.length) {
-                boardUpdated = true;
-                constraint.variables.forEach(squareIndex => {
-                    let square = this.mineBoard.getSquare(
-                        Math.floor(squareIndex / this.gridColumn),
-                        squareIndex % this.gridColumn
-                    );
-                    if (square.isCovered && !square.isFlagged) {
-                        if (mines == 0) {
-                            // if AFN
-                            square.setCovered = false;
-                            this.frontierSquares.push(squareIndex);
-                            this.probedSqauresCount++;
-                            let num = this.mineBoard.countNeighbor(square, 0)
-                            square.draw(num);
-                        } else {
-                            // if AMN
-                            square.setFlagged = true;
-                            this.flagCount++;
-                            square.draw(11);
-                        }
-                    }
-                });
+        for (let i = constraintsList.length - 1; i >= 0; i--) {
+            let constraint = constraintsList[i];
+            let mines = constraint.getMineNum;
+            if (!(mines == 0 || mines == constraint.variables.length)) {
+                continue;
             }
-        });
+            boardUpdated = true;
+            constraint.variables.forEach(squareIndex => {
+                let square = board.getSquare(
+                    Math.floor(squareIndex / board.gridColumn),
+                    squareIndex % board.gridColumn
+                );
+                if (square.isCovered && !square.isFlagged) {
+                    if (mines == 0) {
+                        // if AFN
+                        square.setCovered = false;
+                        frontier.push(squareIndex);
+                        board.probedSquareNum++;
+                        let num = board.countNeighbor(square, 0)
+                        square.draw(num);
+                    } else {
+                        // if AMN
+                        square.setFlagged = true;
+                        board.flagNum++;
+                        square.draw(11);
+                    }
+                }
+            });
+            constraintsList.splice(i, 1);
+        }
+        if (boardUpdated) {
+            for (let i = frontier.length - 1; i >= 0; i--) {
+                let square = board.getSquare(
+                    Math.floor(frontier[i] / board.gridColumn),
+                    frontier[i] % board.gridColumn
+                );
+                let coveredNum = board.countNeighbor(square, board.COUNT_NEIGHBOR_COVERED);
+                let flaggedNum = board.countNeighbor(square, board.COUNT_NEIGHBOR_FLAG);
+                if (coveredNum == flaggedNum) {
+                    frontier.splice(i, 1);
+                }
+            }
+        }
         return boardUpdated;
     }
 }
