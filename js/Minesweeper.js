@@ -16,14 +16,21 @@ export default class Minesweeper {
         this.leftButtonDown = false;
         this.rightButtonDown = false;
 
-        this.squareImgDir = "img/square.png";
-        this.flagImgDir = "img/flag.png";
-        this.facePlainImgDir = "img/plain.png";
-        this.faceWinDir = "img/win.png";
-        this.faceLoseDir = "img/lose.png";
+        this.squareImgDir = "img/square.svg";
+        this.flagImgDir = "img/flag.svg";
+        this.facePlainImgDir = "img/plain.svg";
+        this.faceWinDir = "img/win.svg";
+        this.faceLoseDir = "img/lose.svg";
 
         this.guessFreeBox = document.querySelector("#guess-free-mode");
         this.guessFreeBox.addEventListener("click", (event) => this.setGuessFree());
+        
+        let infoIcon = document.querySelector("#info-icon");
+        infoIcon.addEventListener("click", (event) => {
+            let tooltip = document.querySelector(".tooltip-text");
+            let opacity = window.getComputedStyle(tooltip).opacity;
+            tooltip.style.opacity = opacity == 0 ? 1 : 0;
+        });
 
         this.scoreElement = document.querySelector("#beginnerScore");
 

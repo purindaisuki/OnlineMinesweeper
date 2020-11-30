@@ -12,6 +12,7 @@ main {
     text-align: center;
     border-collapse: collapse;
     border-style: hidden;
+    width: min-content;
 }
 
 #menu td {
@@ -24,7 +25,51 @@ main {
 }
 
 #option {
+    display: flex;
     margin: 10px; margin-top: 0;
+    align-items: center;
+}
+
+#info-icon {
+    cursor: pointer;
+    margin: 0; margin-left: 4px;
+    width: 16px; height: 16px;
+}
+
+.tooltip {
+    position: relative;
+    margin-left: 8px;
+}
+
+.tooltip .tooltip-text {
+    opacity: 0;
+    display: inline-block;
+    width: 311px;
+    font-size: 12px; color: black;
+    line-height: 16px;
+    text-align: left;
+    word-break: break-word;
+    padding: 5px;
+    border-radius: 6px;
+    top: -5px;
+    left: 105%;
+    border-width: 2px;
+    border-style: solid;
+    border-color: black;
+}
+
+.tooltip .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 98.5%;
+    margin-top: -5px;
+    padding: .2em;
+    background-color: white;
+    border: inherit;
+    border-right: 0;
+    border-top: 0;
+    transform: rotate(45deg);
 }
 
 #outside-frame {
@@ -72,7 +117,7 @@ main {
 
 .digit {
     background-repeat: no-repeat;
-    background: url("./img/digits.png");
+    background: url("./img/digits.svg");
     background-position: calc(var(--bgPosition) * -18px) 0;
     width: 17px;
     height: 32px;
