@@ -111,69 +111,67 @@ export default class Solver {
             let constraintsCopy = Array.from(constraintsList);
             (function () { 
                 for (let c1Index = 0; c1Index < constraintsCopy.length; c1Index++) {
-                    for (let c2Index = 0; c2Index < constraintsCopy.length; c2Index++) {
+                    for (let c2Index = c1Index + 1; c2Index < constraintsCopy.length; c2Index++) {
                         // compare elements in list
-                        if (c1Index < c2Index) {
-                            let c1 = constraintsCopy[c1Index];
-                            let c2 = constraintsCopy[c2Index];
-                            //intxn refers to intersection of variables of c1 and c2
-                            let intxnVariables = c1.variables.filter(v => c2.variables.includes(v));
-                            if (intxnVariables.length == 0) {
-                                // continue to next pair if no intersection
-                                continue;
-                            }
-                            //subtraction c1-c2
-                            let c12Variables = c1.variables.filter(v => !intxnVariables.includes(v));
-                            //subtraction c2-c1
-                            let c21Variables = c2.variables.filter(v => !intxnVariables.includes(v));
-
-                            //subset of variables are subject to the constraints of its parents
-                            let intxnMineMax = Math.min(
-                                intxnVariables.length,
-                                (Math.min(c1.getMineNum, c2.getMineNum))
-                            );
-                            let c12MineMin = c1.getMineNum - (c1.variables.length - intxnVariables.length);
-                            let c21MineMin = c2.getMineNum - (c2.variables.length - intxnVariables.length);
-                            let intxnMineMin = Math.max(c12MineMin, c21MineMin);
-                            let intxnMineDomain = Array.from(
-                                new Array(intxnMineMax - intxnMineMin + 1),
-                                (v, i) => i + intxnMineMin
-                            );
-                            
-                            //c1 subtracts c2
-                            let c12MineDomain = Array.from(intxnMineDomain, v => c1.getMineNum - v);
-                            c12MineDomain = c12MineDomain.filter(m => m <= c12Variables.length);
-                            //c2 subtracts c1
-                            let c21MineDomain = Array.from(intxnMineDomain, v => c2.getMineNum - v);
-                            c21MineDomain = c21MineDomain.filter(m => m <= c21Variables.length);
-                            
-                            let result = [];
-                            let subSets = [
-                                [intxnVariables, intxnMineDomain],
-                                [c12Variables, c12MineDomain],
-                                [c21Variables, c21MineDomain]
-                            ];
-                            subSets.forEach(s => {
-                                // only one possible solution
-                                if (s[0].length != 0 && s[1].length == 1) {
-                                    let subConstraint = new Constraint(s[1][0]);
-                                    s[0].forEach(v => subConstraint.push(v));
-                                    constraintsList.push(subConstraint);
-                                    constraintsUpdated = true;
-                                }
-                                result.push(s[1].length == 1);
-                            });
-
-                            // remove constraint if one is a proper set of another
-                            if (result[0] && result[2]) {
-                                constraintsList.splice(constraintsList.indexOf(c2),1);
-                            }
-                            if (result[0] && result[1]) {
-                                constraintsList.splice(constraintsList.indexOf(c1),1);
-                            }
-
-                            if (constraintsUpdated) return;
+                        let c1 = constraintsCopy[c1Index];
+                        let c2 = constraintsCopy[c2Index];
+                        //intxn refers to intersection of variables of c1 and c2
+                        let intxnVariables = c1.variables.filter(v => c2.variables.includes(v));
+                        if (intxnVariables.length == 0) {
+                            // continue to next pair if no intersection
+                            continue;
                         }
+                        //subtraction c1-c2
+                        let c12Variables = c1.variables.filter(v => !intxnVariables.includes(v));
+                        //subtraction c2-c1
+                        let c21Variables = c2.variables.filter(v => !intxnVariables.includes(v));
+
+                        //subset of variables are subject to the constraints of its parents
+                        let intxnMineMax = Math.min(
+                            intxnVariables.length,
+                            (Math.min(c1.getMineNum, c2.getMineNum))
+                        );
+                        let c12MineMin = c1.getMineNum - (c1.variables.length - intxnVariables.length);
+                        let c21MineMin = c2.getMineNum - (c2.variables.length - intxnVariables.length);
+                        let intxnMineMin = Math.max(c12MineMin, c21MineMin);
+                        let intxnMineDomain = Array.from(
+                            new Array(intxnMineMax - intxnMineMin + 1),
+                            (v, i) => i + intxnMineMin
+                        );
+                        
+                        //c1 subtracts c2
+                        let c12MineDomain = Array.from(intxnMineDomain, v => c1.getMineNum - v);
+                        c12MineDomain = c12MineDomain.filter(m => m <= c12Variables.length);
+                        //c2 subtracts c1
+                        let c21MineDomain = Array.from(intxnMineDomain, v => c2.getMineNum - v);
+                        c21MineDomain = c21MineDomain.filter(m => m <= c21Variables.length);
+                        
+                        let result = [];
+                        let subSets = [
+                            [intxnVariables, intxnMineDomain],
+                            [c12Variables, c12MineDomain],
+                            [c21Variables, c21MineDomain]
+                        ];
+                        subSets.forEach(s => {
+                            // only one possible solution
+                            if (s[0].length != 0 && s[1].length == 1) {
+                                let subConstraint = new Constraint(s[1][0]);
+                                s[0].forEach(v => subConstraint.push(v));
+                                constraintsList.push(subConstraint);
+                                constraintsUpdated = true;
+                            }
+                            result.push(s[1].length == 1);
+                        });
+
+                        // remove constraint if one is a proper set of another
+                        if (result[0] && result[2]) {
+                            constraintsList.splice(constraintsList.indexOf(c2),1);
+                        }
+                        if (result[0] && result[1]) {
+                            constraintsList.splice(constraintsList.indexOf(c1),1);
+                        }
+
+                        if (constraintsUpdated) return;
                     }
                 }
             }) ();
